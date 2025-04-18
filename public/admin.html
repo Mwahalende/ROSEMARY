@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Register Order</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background-color: #f9fafc;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    input, select, button {
+      display: block;
+      margin: 12px auto;
+      padding: 12px;
+      width: 90%;
+      max-width: 400px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+
+    #connectBtn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #connectBtn:hover {
+      background-color: #0069d9;
+    }
+
+    #submitBtn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      display: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #submitBtn:hover {
+      background-color: #218838;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h2>Register Customer Order</h2>
+  <input id="fullname" placeholder="Full Name" required>
+  <select id="food">
+    <option value="Pizza">Pizza</option>
+    <option value="Bagga">Bagga</option>
+    <option value="KFC">KFC</option>
+    <option value="Ugali">Ugali</option>
+    <option value="Wali">Wali</option>
+    <option value="Pirau">Pirau</option>
+    <option value="Supu Nyama">Supu Nyama</option>
+    <option value="Supu Kuku">Supu Kuku</option>
+  </select>
+  <input id="buzzerId" placeholder="Buzzer ID (e.g. 01)">
+  <input id="orderNumber" placeholder="Order Number">
+  <input id="price" placeholder="Price">
+
+  <button id="connectBtn" onclick="connectBluetooth()">Connect to ESP32</button>
+  <button id="submitBtn" onclick="submitOrder()">Submit Order</button>
+
+  <script>
+    let deviceConnected = false;
+    let device;
+
+    async function connectBluetooth() {
+      try {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: 'ESP32' }],
+          optionalServices: ['battery_service']
+        });
+        const server = await device.gatt.connect();
+        deviceConnected = true;
+        document.getElementById('connectBtn').innerText = 'Connected!';
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('submitBtn').style.display = 'block';
+        alert('Successfully connected to ESP32');
+      } catch (error) {
+        alert('Failed to connect to ESP32: ' + error);
+      }
+    }
+
+    async function submitOrder() {
+      if (!deviceConnected) {
+        alert('Please connect to ESP32 first.');
+        return;
+      }
+
+      const data = {
+        fullname: document.getElementById('fullname').value,
+        food: document.getElementById('food').value,
+        buzzerId: document.getElementById('buzzerId').value,
+        orderNumber: document.getElementById('orderNumber').value,
+        price: document.getElementById('price').value,
+      };
+
+      const res = await fetch('/submit-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      alert(result.message);
+    }
+  </script>
+</body>
+</html>
+

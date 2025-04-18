@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kitchen Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #eef2f5;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    #orders {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .order {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-left: 5px solid #4CAF50;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .order:hover {
+      transform: translateY(-5px);
+    }
+
+    .order strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .order button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .order button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h2>Kitchen Dashboard</h2>
+  <div id="orders"></div>
+
+  <script>
+    async function loadOrders() {
+      const res = await fetch('/orders');
+      const orders = await res.json();
+      const container = document.getElementById('orders');
+      container.innerHTML = '';
+      orders.forEach(order => {
+        container.innerHTML += `
+          <div class="order">
+            <strong>${order.fullname}</strong>
+            Food: ${order.food}<br>
+            Buzzer ID: ${order.buzzerId}<br>
+            Order #: ${order.orderNumber}<br>
+            Price: ${order.price}<br>
+            <button onclick="buzz('${order.buzzerId}')">Activate Buzzer</button>
+          </div>`;
+      });
+    }
+
+    async function buzz(buzzerId) {
+      await fetch('/activate-buzzer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buzzerId })
+      });
+      alert('Buzzer Activated for ID: ' + buzzerId);
+    }
+
+    setInterval(loadOrders, 3000);
+    loadOrders();
+  </script>
+</body>
+</html>
+
