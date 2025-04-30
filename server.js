@@ -7,9 +7,8 @@ const port = 3000;
 
 app.use(express.static('public'));
 app.use(express.json());
-
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/ROSEMARY");
+mongoose.connect("mongodb+srv://user1:malafiki@leodb.5mf7q.mongodb.net/?retryWrites=true&w=majority&appName=leodb");
 mongoose.connection.on("connected", () => {
   console.log("✅ MongoDB connected successfully");
 });
